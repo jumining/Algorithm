@@ -2,54 +2,34 @@ N = int(input())
 arr = [list(input()) for _ in range(N)]
 
 
-def get_headx_heady():
+def get_length(x, y, dx, dy):
+    length = 0
+    while 0 <= x + dx * (length + 1) < N and 0 <= y + dy * (length + 1) < N:
+        if arr[x + dx * (length + 1)][y + dy * (length + 1)] != "*":
+            break
+        length += 1
+    return length
+
+
+def find_head_position():
     for x in range(N):
         for y in range(N):
             if arr[x][y] == "*":
                 return x, y
 
 
-def get_left_arm_length():
-    i = 0
-    while hy - 1 - i >= 0 and arr[hx][hy - 1 - i] == "*":
-        i += 1
-    return i
+head_x, head_y = find_head_position()
+heart_x, heart_y = head_x + 1, head_y
+print(heart_x + 1, heart_y + 1)
 
+left_arm_length = get_length(heart_x, heart_y, 0, -1)
+right_arm_length = get_length(heart_x, heart_y, 0, 1)
+waist_length = get_length(heart_x, heart_y, 1, 0)
 
-def get_right_arm_length():
-    i = 0
-    while hy + 1 + i <= N - 1 and arr[hx][hy + 1 + i] == "*":
-        i += 1
-    return i
+waist_end_x = heart_x + waist_length
+waist_end_y = heart_y
 
+left_leg_length = get_length(waist_end_x, waist_end_y - 1, 1, 0)
+right_leg_length = get_length(waist_end_x, waist_end_y + 1, 1, 0)
 
-def get_waist():
-    i = 0
-    while hx + 1 + i <= N - 1 and arr[hx + 1 + i][hy] == "*":
-        i += 1
-    return i, hx + i, hy
-
-
-def get_left_leg_length():
-    i = 0
-    while wx + 1 + i <= N - 1 and arr[wx + 1 + i][wy - 1] == "*":
-        i += 1
-    return i
-
-
-def get_right_leg_length():
-    i = 0
-    while wx + 1 + i <= N - 1 and arr[wx + 1 + i][wy + 1] == "*":
-        i += 1
-    return i
-
-
-head_x, head_y = get_headx_heady()
-hx, hy = head_x + 1, head_y
-print(hx + 1, hy + 1)
-length_left_arm = get_left_arm_length()
-length_right_arm = get_right_arm_length()
-length_waist, wx, wy = get_waist()
-length_left_leg = get_left_leg_length()
-length_right_leg = get_right_leg_length()
-print(length_left_arm, length_right_arm, length_waist, length_left_leg, length_right_leg)
+print(left_arm_length, right_arm_length, waist_length, left_leg_length, right_leg_length)
