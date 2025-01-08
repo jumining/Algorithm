@@ -5,11 +5,8 @@ words = {}
 
 for _ in range(N):
   word = sys.stdin.readline().strip()
-  if word in words:
-    words[word] += 1
-  else:
-    if len(word) >= M:
-      words[word] = 1
+  if len(word) >= M:
+    words[word] = words.get(word, 0) + 1
   
 words = sorted(words.items(), key=lambda x: (-x[1], -len(x[0]), x[0]))
 for w, _ in words:
