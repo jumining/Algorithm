@@ -1,11 +1,10 @@
 import sys
 input = sys.stdin.readline
 
-isUsed1 = [False]*30
-isUsed2 = [False]*30
-isUsed3 = [False]*30
+isUsed1 = [False]*40
+isUsed2 = [False]*40
+isUsed3 = [False]*40
 
-N = int(input())
 cnt = 0
 
 def func(cur):
@@ -14,15 +13,16 @@ def func(cur):
         cnt += 1
         return
     for i in range(N):
-        if isUsed1[cur+i] or isUsed2[cur-i+N-1] or isUsed3[i]:
+        if isUsed1[i] or isUsed2[cur+i] or isUsed3[cur-i+N-1]:
             continue
-        isUsed1[cur+i] = True
-        isUsed2[cur-i+N-1] = True
-        isUsed3[i] = True
+        isUsed1[i] = True
+        isUsed2[cur+i]=True
+        isUsed3[cur-i+N-1]=True
         func(cur+1)
-        isUsed1[cur+i] = False
-        isUsed2[cur-i+N-1] = False
-        isUsed3[i] = False
+        isUsed1[i] = False
+        isUsed2[cur+i]=False
+        isUsed3[cur-i+N-1]=False
 
+N = int(input())
 func(0)
 print(cnt)
