@@ -21,22 +21,22 @@ def move(y, x, dy, dx):
         x += dx
     return y, x
 
-def dir_name(dy, dx):
-    directions = {
+# 디버깅용
+def direction_name(dy, dx):
+    return {
         (-1, 0): '위',
         (1, 0): '아래',
         (0, -1): '왼쪽',
         (0, 1): '오른쪽'
-    }
-    return directions.get((dy, dx), '알 수 없는 방향')
+    }.get((dy, dx), '알 수 없는 방향')
 
 # bfs 진행
 def bfs():
     global rx, ry, bx, by
-    visited = []
+    visited = set()
     q = deque()
     q.append((rx, ry, bx, by, 1))
-    visited.append((rx, ry, bx, by))
+    visited.add((rx, ry, bx, by))
     while q:
         rx, ry, bx, by, cnt = q.popleft()
         # print(f"[BFS 단계] cnt: {cnt}, 빨간 구슬 위치: ({ry}, {rx}), 파란 구슬 위치: ({by}, {bx})")
@@ -75,7 +75,7 @@ def bfs():
             if (nrx, nry, nbx, nby) not in visited:
                 # print("   ✅ 새로운 상태 - 큐에 추가")
                 q.append((nrx, nry, nbx, nby, cnt+1))
-                visited.append((nrx, nry, nbx, nby))
+                visited.add((nrx, nry, nbx, nby))
 
     return -1
 
