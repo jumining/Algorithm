@@ -2,91 +2,95 @@ from collections import deque
 
 # 입력 
 N, M, K = map(int, input().split())
-board = []
-for _ in range(N):
-    board.append(list(map(int, input().split())))
+board = [list(map(int, input().split())) for _ in range(N)]
 
-# 위, 오른, 아래, 왼
-dir = [(-1, 0), (0, 1), (1, 0), (0, -1)] 
-dice = [1,4,3,5,6,2]
-global_idx = 1 # 초기 방향 동쪽
+# 방향: 북(0), 동(1), 남(2), 서(3)
+dir = [(-1, 0), (0, 1), (1, 0), (0, -1)]
 
-def change_dir_idx(A, B):
-    global dir_idx
-    if A > B:
-        # 오른쪽으로 회전
-        dir_idx = (dir_idx + 1) % 4
-    elif A < B:
-        # 왼쪽으로 회전
-        dir_idx = (dir_idx - 1) % 4
-    # print(f"{'시계방향 회전' if A > B else '시계반대방향 회전'} -> {get_directions_korean(dir_idx)}쪽으로")
+# 주사위: [t, r, b, l, f, ba]
+dice = [1,3,6,4,5,2]
 
-def rotate(dir_idx):
-    a,b,c,d,e,f = dice
+# 점수 캐시
+score_cache = [[0] * M for _ in range(N)]
 
-    if dir_idx == 1: # 오른쪽
-        dice[0], dice[1], dice[2], dice[4] = b, e, a, c
-    elif dir_idx == 3: # 왼쪽
-        dice[0], dice[1], dice[2], dice[4] = c, a, e, b
-    elif dir_idx == 0: # 위쪽
-        dice[0], dice[3], dice[4], dice[5] = d, e, f, a
-    elif dir_idx == 2: #아래쪽
-        dice[0], dice[3], dice[4], dice[5] = f, a, d, e
-
-def dfs(y, x, b):
-    global cnt
-    visited[y][x] = True
-    cnt += 1
-    for dx, dy in dir: 
-        ny, nx = y + dy,  x + dx
-        if in_range(ny, nx) and not visited[ny][nx] and board[ny][nx] == b:
-            dfs(ny, nx, b)
-
+# 범위 유효성
 def in_range(y, x):
     return 0<=y<N and 0<=x<M
 
-# 디버깅용
-def get_directions_korean(dir_idx):
-    return { 
-        0: '북',
-        1: '동',
-        2: '남',
-        3: '서'
-    }.get(dir_idx)
+# 조건 따라 방향 바꾸기
+def change_dir(A, B, d):
+    if A > B:
+        return (d + 1) % 4  # 시계
+    elif A < B:
+        return (d + 3) % 4  # 반시계
+    return d
 
+# 주사위 회전 로직
+def rotate(d):
+    t, r, b, l, f, ba = dice
+    if d == 0:  # 북
+        dice[:] = [f, r, ba, l, b, t]
+    elif d == 1:  # 동
+        dice[:] = [l, t, r, b, f, ba]
+    elif d == 2:  # 남
+        dice[:] = [ba, r, f, l, t, b]
+    elif d == 3:  # 서
+        dice[:] = [r, b, l, t, f, ba]
+
+# 점수 구하기
+def get_score(y,x):
+    if score_cache[y][x]:
+        return score_cache[y][x]
+    
+    val = board[y][x]
+    visited = [[False]*M for _ in range(N)]
+    visited[y][x] = True
+    q = deque([(y,x)])
+    cnt = 1
+
+    while q:
+        cy, cx = q.popleft()
+        for dy, dx in dir:
+            ny, nx = cy + dy, cx + dx
+            if in_range(ny, nx) and not visited[ny][nx] and board[ny][nx] == val:
+                visited[ny][nx] = True
+                q.append((ny,nx))
+                cnt += 1
+    
+    score = cnt * val
+    for i in range(N):
+        for j in range(M):
+            if visited[i][j]:
+                score_cache[i][j] = score
+    return score
+
+# 시작 사전 정보
+y, x, dir_idx = 0, 0, 1 
 total = 0
-dir_idx = 1
-y, x = 0, 0
+
 for _ in range(K):
     dy, dx = dir[dir_idx]
 
-    # dfs 초기화
-    visited = [[False] * M for _ in range(N)]
-    cnt = 0
-
-    # 만약, 이동 방향에 칸이 없다면, 이동 방향을 반대로 한다.
+    # 이동 방향에 칸이 없다면, 이동 방향을 반대로
     if not in_range(y + dy, x + dx):
         dir_idx = (dir_idx + 2) % 4
+        dy, dx = dir[dir_idx]
 
-    # 이동 방향으로 한 칸 굴러간다.
-    dy, dx = dir[dir_idx]
+    # 이동 방향으로 한 칸 굴러가기
     rotate(dir_idx)
     y += dy
     x += dx
-    # print(f"\n{get_directions_korean(dir_idx)}쪽으로 굴러감 -> {y+1, x+1}")
-    # print(f"  🎲 주사위: {dice[5], dice[1], dice[0], dice[2], dice[3], dice[4]}")
-    
-    # dfs로 이동 가능한 칸의 수를 구해서 점수 구하기
-    dfs(y, x, board[y][x])
-    # print(f"  B가 {board[y][x]}인 칸 수 : {cnt}")
-    
-    A = cnt * board[y][x]
-    # print(f"  💯 점수: {A}")
+    # print(f"\n🌀 회전 후 위치: ({y+1}, {x+1}) | 방향: {['북','동','남','서'][dir_idx]}")
+    # print(f"🎲 주사위 상태: {dice}")
 
-    # 점수 합하기
-    total += A
+    # 점수 구하기 - bfs 이용 
+    s = get_score(y,x)
+    total += s # 같은 칸 개수 * 값
+    # print(f"💯 점수: {s} (B: {board[y][x]})")
 
-    # 값 비교해서 이동 방향을 결정한다.
-    change_dir_idx(dice[4], board[y][x])
+    # 값 비교해서 이동 방향을 결정하기
+    # prev_dir = dir_idx
+    dir_idx = change_dir(dice[2], board[y][x], dir_idx)
+    # print(f"➡️ 방향 전환: A(바닥): {dice[2]}, B(지도): {board[y][x]} | {['북','동','남','서'][prev_dir]} → {['북','동','남','서'][dir_idx]}")
 
 print(total)
