@@ -16,22 +16,18 @@ def combine(arr, r): # n개 중에 r개
 
 def calculate(arr):
     score = 0
-    if N/2 == 2:
-        a, b = arr[0], arr[1]
-        return powers[a][b] + powers[b][a]
-    else:
-        pairs = combine(arr, 2)
-        for pair in pairs:
-            a, b = pair[0], pair[1]
+    for i in range(len(arr)):
+        for j in range(i+1, len(arr)):
+            a, b = arr[i], arr[j]
             score += powers[a][b] + powers[b][a]
     return score
 
 N = int(input())
 powers = [list(map(int, input().split())) for _ in range(N)]
-members = [i for i in range(N)]
+members = list(range(N))
 minv = float('inf')
 
-for a in combine(members, N/2):
+for a in combine(members, N//2):
     if 0 not in a:
         continue
     b = [x for x in members if x not in a]
