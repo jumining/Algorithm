@@ -9,44 +9,44 @@ def seek_union(y, x):
     q.append((y,x))
     visited[y][x] = True    
     
-    union = []
-    us = []
-    sum = 0
+    union = [(y,x)]
+    total = peoples[y][x]
     
     while q:
         y, x = q.popleft()
-        union.append((y, x))
-        sum += peoples[y][x]
-        us.append(peoples[y][x])
         for dy, dx in DIRECTIONS:
             ny, nx = y+dy, x+dx
             if 0<=ny<N and 0<=nx<N and not visited[ny][nx]:
                 if R <= abs(peoples[y][x]-peoples[ny][nx]) <= M:
-                    q.append((ny,nx))
                     visited[ny][nx] = True
-    return union, sum, us
+                    q.append((ny,nx))
+                    union.append((ny, nx))
+                    total += peoples[ny][nx]
+    return union, total
 
-def redistribute(union, union_sum):
-    nv = union_sum // len(union)
+def redistribute(union, total):
+    nv = total // len(union)
     for y,x in union:
         peoples[y][x] = nv
 
+# 입력 처리
 N, R, M = map(int, input().split())
 peoples = [list(map(int, input().split())) for _ in range(N)]
 
 day = 0
-moved = True
-while moved:
+while True:
     moved = False
     visited = [[False]*N for _ in range(N)]
+    
     for y in range(N):
         for x in range(N):
             if not visited[y][x]:
-                union, sum, us = seek_union(y,x)
+                union, total = seek_union(y,x)
                 if len(union) >= 2:
                     moved = True
-                    redistribute(union, sum)   
-    if moved:
-        day += 1                      
+                    redistribute(union, total)   
+    if not moved:
+        break
+    day += 1                      
 
 print(day)
