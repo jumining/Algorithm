@@ -1,8 +1,8 @@
-# 10:30-
+# 10:30-11:50 (1h 20m 소요)
 
 # 감시 영역 칠하는 함수
 def fill(y,x,dirs,board):
-    new_board = [row[:] for row in board]
+    modified = []
     for d in dirs:
         ny, nx = y, x
         dy, dx = FDIR[d]
@@ -15,14 +15,20 @@ def fill(y,x,dirs,board):
                 break
 
             # 벽 만남
-            if new_board[ny][nx] == 6:
+            if board[ny][nx] == 6:
                 break
 
             # CCTV 만남
-            if new_board[ny][nx] == 0:
-                new_board[ny][nx] = '#'         
-    return new_board
+            if board[ny][nx] == 0:
+                board[ny][nx] = 7 # str 성능 손해 
+                modified.append((ny,nx))       
+    return modified
 
+# board 원상복구 - deep copy보다 성능 향상
+def undo(board, modified):
+    for y, x in modified:
+        board[y][x] = 0
+    
 # dfs
 def dfs(depth, board):
     global min_blind
@@ -33,8 +39,9 @@ def dfs(depth, board):
     
     y, x, type = cctv[depth]
     for dirs in DIR[type]:
-        new_board = fill(y,x,dirs,board)
-        dfs(depth+1, new_board)
+        modified = fill(y,x,dirs,board)
+        dfs(depth+1, board)
+        undo(board, modified)
 
 # 입력
 N, M = map(int, input().split())
