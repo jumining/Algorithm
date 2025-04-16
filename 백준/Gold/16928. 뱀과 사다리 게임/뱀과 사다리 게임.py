@@ -1,33 +1,29 @@
 from collections import deque
 
-N, M = map(int, input().split())
-ladders = [0] * 101
-snakes = [0] * 101
-for i in range(N):
-    a, b = map(int, input().split())
-    ladders[a] = b
-for i in range(M):
-    a, b = map(int, input().split())
-    snakes[a] = b
+BOARD_SIZE = 100
 
-def bfs(cur_pos, cur_cnt):
-    visited = [False] * 101
-    q = deque([(cur_pos, cur_cnt)])
-    visited[cur_pos] = True
+N, M = map(int, input().split())
+move = [i for i in range(BOARD_SIZE + 1)]
+
+for i in range(N+M):
+    a, b = map(int, input().split())
+    move[a] = b
+
+def bfs():
+    visited = [False] * (BOARD_SIZE + 1)
+    q = deque([(1, 0)])
+    visited[1] = True
+
     while q:
         cur_pos, cur_cnt = q.popleft()
 
-        if ladders[cur_pos]:
-            cur_pos = ladders[cur_pos]
-        if snakes[cur_pos]:
-            cur_pos = snakes[cur_pos]
-
-        if cur_pos == 100:
+        if cur_pos == BOARD_SIZE:
             return cur_cnt
 
         for i in range(1, 7):
-            if cur_pos + i <= 100 and not visited[cur_pos + i]:
-                q.append((cur_pos + i, cur_cnt + 1))
-                visited[cur_pos + i] = True
-                
-print(bfs(1, 0))
+            next_pos = cur_pos + i
+            if next_pos <= BOARD_SIZE and not visited[move[next_pos]]:
+                visited[move[next_pos]] = True
+                q.append((move[next_pos], cur_cnt + 1))
+
+print(bfs())
