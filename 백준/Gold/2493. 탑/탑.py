@@ -1,19 +1,23 @@
 import sys
 input = sys.stdin.readline
 
-N = int(input())
-arr = list(map(int, input().split()))
+def main():
+    N = int(input())
+    heights = list(map(int, input().split()))
+    stack = []  # (높이, 인덱스)
+    result = [0] * N
 
-stack = []
-results = []
+    for i in range(N):
+        current_height = heights[i]
 
-for i in range(N):
-    while stack and stack[-1][0] < arr[i]:
-        stack.pop()
-    if stack:
-        results.append(stack[-1][1])
-    else:
-        results.append(0)
-    stack.append((arr[i], i+1))
+        while stack and stack[-1][0] < current_height:
+            stack.pop()
 
-print(' '.join(map(str, results)))
+        if stack:
+            result[i] = stack[-1][1]
+
+        stack.append((current_height, i + 1))  
+
+    sys.stdout.write(' '.join(map(str, result)) + '\n')
+
+main()
